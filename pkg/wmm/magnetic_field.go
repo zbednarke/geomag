@@ -17,8 +17,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/westphae/geomag/pkg/egm96"
-	"github.com/westphae/geomag/pkg/polynomial"
+	"github.com/zbednarke/geomag/pkg/egm96"
+	"github.com/zbednarke/geomag/pkg/polynomial"
 )
 
 const (
@@ -107,8 +107,9 @@ func (m MagneticField) I() (f float64) {
 // The declination is the angle the field makes relative to True North.
 // This is the most often-used value provided for the WMM for near-Earth
 // navigation.  To convert Magnetic North to True North:
-//  d := field.D()
-//  TrueNorth := Magnetic_North + d
+//
+//	d := field.D()
+//	TrueNorth := Magnetic_North + d
 //
 // The return value is in degrees.
 func (m MagneticField) D() (f float64) {
@@ -266,30 +267,30 @@ func CalculateWMMMagneticField(loc egm96.Location, t time.Time) (field MagneticF
 		sinPhi := math.Sin(phi)
 		cosPhi := math.Cos(phi)
 		var g, h, dg, dh float64
-		for n:=1; n<=MaxLegendreOrder; n++ {
-			nn := float64(n+1)
+		for n := 1; n <= MaxLegendreOrder; n++ {
+			nn := float64(n + 1)
 			// if height varies, recalculate from here
 			f := polynomial.Pow(AGeo/hh, n+2)
-			for m:=0; m<=n; m++ {
+			for m := 0; m <= n; m++ {
 				mf := float64(m)
 				// if latitude varies, recalculate from here
 				p := polynomial.LegendreFunction(n, m, sinPhi)
 				q := polynomial.LegendreFunction(n+1, m, sinPhi)
-				if m>0 {
-					p *= math.Sqrt(2/polynomial.FactorialRatioFloat(n+m, n-m))
-					q *= math.Sqrt(2/polynomial.FactorialRatioFloat(n+m, n-m))
+				if m > 0 {
+					p *= math.Sqrt(2 / polynomial.FactorialRatioFloat(n+m, n-m))
+					q *= math.Sqrt(2 / polynomial.FactorialRatioFloat(n+m, n-m))
 				}
 				dp := nn*math.Tan(phi)*p - (nn-mf)/cosPhi*q
 				g, h, dg, dh, err = GetWMMCoefficients(n, m, ValidDate)
 				// if longitude varies, recalculate from here
-				sinMLambda := math.Sin(mf*lambda)
-				cosMLambda := math.Cos(mf*lambda)
-				curField.x += -f*(g*cosMLambda+h*sinMLambda)*dp
-				curField.y += f/cosPhi*mf*(g*sinMLambda-h*cosMLambda)*p
-				curField.z += -nn*f*(g*cosMLambda+h*sinMLambda)*p
-				curField.dx += -f*(dg*cosMLambda+dh*sinMLambda)*dp
-				curField.dy += f/cosPhi*mf*(dg*sinMLambda-dh*cosMLambda)*p
-				curField.dz += -nn*f*(dg*cosMLambda+dh*sinMLambda)*p
+				sinMLambda := math.Sin(mf * lambda)
+				cosMLambda := math.Cos(mf * lambda)
+				curField.x += -f * (g*cosMLambda + h*sinMLambda) * dp
+				curField.y += f / cosPhi * mf * (g*sinMLambda - h*cosMLambda) * p
+				curField.z += -nn * f * (g*cosMLambda + h*sinMLambda) * p
+				curField.dx += -f * (dg*cosMLambda + dh*sinMLambda) * dp
+				curField.dy += f / cosPhi * mf * (dg*sinMLambda - dh*cosMLambda) * p
+				curField.dz += -nn * f * (dg*cosMLambda + dh*sinMLambda) * p
 			}
 		}
 	}

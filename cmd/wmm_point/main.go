@@ -1,7 +1,8 @@
 // wmm_point estimates the strength and direction of Earth's main Magnetic field for a given point/area.
 //
 // Usage is
-//  wmm_point --cof_file=WMM2020.COF --spherical [latitude] [longitude] [altitude] [date]
+//
+//	wmm_point --cof_file=WMM2020.COF --spherical [latitude] [longitude] [altitude] [date]
 //
 // The World Magnetic Model (WMM) for 2020
 // is a model of Earth's main Magnetic field.  The WMM
@@ -51,23 +52,24 @@
 // CO, USA) and the British Geological Survey (BGS, Edinburgh, Scotland).
 //
 // Sample output:
-//  Results For
-//  
-//  Latitude:       30.00N
-//  Longitude:      88.51W
-//  Altitude:        0.010 kilometers above mean sea level
-//  Date:           2019.5
-//  
-//         Main Field             Secular Change
-//         F    =  46944.3 nT ± 152.0 nT  -118.8 nT/yr
-//         H    =  24074.6 nT ± 133.0 nT    -6.8 nT/yr
-//         X    =  24060.2 nT ± 138.0 nT    -8.0 nT/yr
-//         Y    =   -831.0 nT ±  89.0 nT   -36.3 nT/yr
-//         Z    =  40301.2 nT ± 165.0 nT  -134.3 nT/yr
-//         Decl =     -1º 59' ± 19'         -5.2'/yr
-//         Incl =     59º  9' ± 13'         -4.6'/yr
-//  
-//         Grid Variation =  -1º 59'
+//
+//	Results For
+//
+//	Latitude:       30.00N
+//	Longitude:      88.51W
+//	Altitude:        0.010 kilometers above mean sea level
+//	Date:           2019.5
+//
+//	       Main Field             Secular Change
+//	       F    =  46944.3 nT ± 152.0 nT  -118.8 nT/yr
+//	       H    =  24074.6 nT ± 133.0 nT    -6.8 nT/yr
+//	       X    =  24060.2 nT ± 138.0 nT    -8.0 nT/yr
+//	       Y    =   -831.0 nT ±  89.0 nT   -36.3 nT/yr
+//	       Z    =  40301.2 nT ± 165.0 nT  -134.3 nT/yr
+//	       Decl =     -1º 59' ± 19'         -5.2'/yr
+//	       Incl =     59º  9' ± 13'         -4.6'/yr
+//
+//	       Grid Variation =  -1º 59'
 package main
 
 import (
@@ -78,17 +80,17 @@ import (
 	"os"
 	"strings"
 
-	"github.com/westphae/geomag/internal/util"
-	"github.com/westphae/geomag/pkg/egm96"
-	"github.com/westphae/geomag/pkg/wmm"
+	parsing "github.com/zbednarke/geomag/internal/util"
+	"github.com/zbednarke/geomag/pkg/egm96"
+	"github.com/zbednarke/geomag/pkg/wmm"
 )
 
 const (
-	usage = "wmm_point --cof_file=WMM2020.COF --spherical [latitude] [longitude] [altitude] [date]"
-	cofUsage = "COF coefficients file to use, empty for the built-in one"
+	usage          = "wmm_point --cof_file=WMM2020.COF --spherical [latitude] [longitude] [altitude] [date]"
+	cofUsage       = "COF coefficients file to use, empty for the built-in one"
 	sphericalUsage = "Output spherical values instead of ellipsoidal"
-	lngErr = "Error: Degree input is outside legal range. The legal range is from -180 to 360."
-	fieldWarn = "Warning: The Horizontal Field strength at this location is only 0.000000. " +
+	lngErr         = "Error: Degree input is outside legal range. The legal range is from -180 to 360."
+	fieldWarn      = "Warning: The Horizontal Field strength at this location is only 0.000000. " +
 		"Compass readings have VERY LARGE uncertainties in areas where where H is smaller than 1000 nT"
 )
 
@@ -130,7 +132,7 @@ func init() {
 func main() {
 	flag.Parse()
 
-	if cofFile!="" {
+	if cofFile != "" {
 		if err = wmm.LoadWMMCOF(cofFile); err != nil {
 			fmt.Println(err)
 			return
@@ -142,19 +144,19 @@ func main() {
 	if flag.NArg() == 0 {
 		userInput()
 	} else if flag.NArg() == 4 {
-		if latitude, err = parsing.ParseLatLng(flag.Arg(0)); err!=nil {
+		if latitude, err = parsing.ParseLatLng(flag.Arg(0)); err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err)
 			return
 		}
-		if longitude, err = parsing.ParseLatLng(flag.Arg(1)); err!=nil {
+		if longitude, err = parsing.ParseLatLng(flag.Arg(1)); err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err)
 			return
 		}
-		if altitude, hae, err = parsing.ParseAltitude(flag.Arg(2)); err!=nil {
+		if altitude, hae, err = parsing.ParseAltitude(flag.Arg(2)); err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err)
 			return
 		}
-		if dYear, err = parsing.ParseTime(flag.Arg(3)); err!=nil {
+		if dYear, err = parsing.ParseTime(flag.Arg(3)); err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err)
 			return
 		}
@@ -181,24 +183,24 @@ func main() {
 	mf, err := wmm.CalculateWMMMagneticField(
 		loc,
 		wmm.DecimalYear(dYear).ToTime(),
-		)
+	)
 
 	fmt.Println("Results For")
 	fmt.Println()
 	lat, lng, hh := loc.Geodetic()
 	qualifier := "N"
-	quantity := lat/egm96.Deg
-	if quantity<0 {
+	quantity := lat / egm96.Deg
+	if quantity < 0 {
 		qualifier = "S"
 		quantity = -quantity
 	}
 	fmt.Printf("Latitude:\t%4.2f%s\n", quantity, qualifier)
 
 	qualifier = "E"
-	quantity = lng/egm96.Deg
-	if quantity>=180 {
+	quantity = lng / egm96.Deg
+	if quantity >= 180 {
 		qualifier = "W"
-		quantity = 360-quantity
+		quantity = 360 - quantity
 	}
 	fmt.Printf("Longitude:\t%4.2f%s\n", quantity, qualifier)
 
@@ -209,7 +211,7 @@ func main() {
 		quantity, _ = loc.HeightAboveMSL()
 		qualifier = "mean sea level"
 	}
-	if quantity<0 {
+	if quantity < 0 {
 		relationship = "below"
 		quantity = -quantity
 	}
@@ -259,53 +261,53 @@ func userInput() {
 	)
 
 	err = fmt.Errorf("")
-	for err!=nil {
+	for err != nil {
 		input = readUserInput(prompt["latitude"])
 		if input == "q" {
 			fmt.Println("Goodbye")
 			os.Exit(1)
 		}
 		latitude, err = parsing.ParseLatLng(input)
-		if err!=nil {
+		if err != nil {
 			fmt.Println(err)
 		}
 	}
 
 	err = fmt.Errorf("")
-	for err!=nil {
+	for err != nil {
 		input = readUserInput(prompt["longitude"])
 		if input == "q" {
 			fmt.Println("Goodbye")
 			os.Exit(1)
 		}
 		longitude, err = parsing.ParseLatLng(input)
-		if err!=nil {
+		if err != nil {
 			fmt.Println(err)
 		}
 	}
 
 	err = fmt.Errorf("")
-	for err!=nil {
+	for err != nil {
 		input = readUserInput(prompt["altitude"])
 		if input == "q" {
 			fmt.Println("Goodbye")
 			os.Exit(1)
 		}
 		altitude, hae, err = parsing.ParseAltitude(input)
-		if err!=nil {
+		if err != nil {
 			fmt.Println(err)
 		}
 	}
 
 	err = fmt.Errorf("")
-	for err!=nil {
+	for err != nil {
 		input = readUserInput(prompt["date"])
 		if input == "q" {
 			fmt.Println("Goodbye")
 			os.Exit(1)
 		}
 		dYear, err = parsing.ParseTime(input)
-		if err!=nil {
+		if err != nil {
 			fmt.Println(err)
 		}
 	}

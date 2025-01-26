@@ -55,7 +55,7 @@ points using a bilinear interpolation.
 
 usage:
 ```
-import "github.com/westphae/geomag/pkg/egm96"
+import "github.com/zbednarke/geomag/pkg/egm96"
 
 // Calculate height above MSL for a point at a
 // latitude of 12.25 South, longitude of 82.75 East, and
@@ -80,8 +80,8 @@ True Heading.
 
 usage:
 ```
-import "github.com/westphae/geomag/pkg/egm96"
-import "github.com/westphae/geomag/pkg/wmm"
+import "github.com/zbednarke/geomag/pkg/egm96"
+import "github.com/zbednarke/geomag/pkg/wmm"
 
 tt := wmm.DecimalYear(2019.5)
 loc := egm96.NewLocationGeodetic(-12.25, 82.75, 1000)

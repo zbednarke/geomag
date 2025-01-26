@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/westphae/geomag/pkg/egm96"
+	"github.com/zbednarke/geomag/pkg/egm96"
 )
 
 const (
-	epsM = 5e-5
-	red = "\u001b[31m"
+	epsM  = 5e-5
+	red   = "\u001b[31m"
 	green = "\u001b[32m"
 	reset = "\u001b[0m"
 )
@@ -30,7 +30,7 @@ func TestMagneticFieldFromPaperDetail(t *testing.T) {
 	// Test values in paper are only for original version of WMM-2015
 	_ = LoadWMMCOF("testdata/WMM2015v1.COF")
 	tt := DecimalYear(2017.5)
-	loc := egm96.NewLocationGeodetic(-80,240,100e3)
+	loc := egm96.NewLocationGeodetic(-80, 240, 100e3)
 
 	lat, lng, hh := loc.Geodetic()
 	testDiff("lambda", lng, 4.1887902048, epsM, t)
@@ -125,7 +125,7 @@ func TestAll2015v2TestValuesFromPaper(t *testing.T) {
 		if dd, err = strconv.ParseFloat(dat[1], 64); err != nil {
 			panic(err)
 		}
-		height = dd*1000
+		height = dd * 1000
 		if dd, err = strconv.ParseFloat(dat[2], 64); err != nil {
 			panic(err)
 		}
@@ -134,7 +134,7 @@ func TestAll2015v2TestValuesFromPaper(t *testing.T) {
 			panic(err)
 		}
 		lon = dd
-		loc := egm96.NewLocationGeodetic(lat,lon,height)
+		loc := egm96.NewLocationGeodetic(lat, lon, height)
 
 		mag, _ := CalculateWMMMagneticField(loc, date.ToTime())
 		xE, yE, zE, dxE, dyE, dzE := mag.Ellipsoidal()
@@ -231,7 +231,7 @@ func TestAll2020TestValuesFromPaper(t *testing.T) {
 	}
 	for scanner.Scan() {
 		// Skip the header lines
-		if scanner.Text()[0]=='#' {
+		if scanner.Text()[0] == '#' {
 			continue
 		}
 
@@ -246,7 +246,7 @@ func TestAll2020TestValuesFromPaper(t *testing.T) {
 		if dd, err = strconv.ParseFloat(dat[1], 64); err != nil {
 			panic(err)
 		}
-		height = dd*1000
+		height = dd * 1000
 
 		if dd, err = strconv.ParseFloat(dat[2], 64); err != nil {
 			panic(err)
@@ -258,7 +258,7 @@ func TestAll2020TestValuesFromPaper(t *testing.T) {
 		}
 		lon = dd
 
-		loc := egm96.NewLocationGeodetic(lat,lon,height)
+		loc := egm96.NewLocationGeodetic(lat, lon, height)
 
 		mag, _ := CalculateWMMMagneticField(loc, date.ToTime())
 		xE, yE, zE, dxE, dyE, dzE := mag.Ellipsoidal()
