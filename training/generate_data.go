@@ -9,7 +9,6 @@ import (
 	"os"
 	"strings"
 
-	parsing "github.com/zbednarke/geomag/internal/util"
 	"github.com/zbednarke/geomag/pkg/egm96"
 	"github.com/zbednarke/geomag/pkg/wmm"
 )
@@ -40,9 +39,9 @@ type Dataset struct {
 	Bx        []float64 `json:"bx"`
 	By        []float64 `json:"by"`
 	Bz        []float64 `json:"bz"`
-	Dbx       []float64 `json:"dbx"`
-	Dby       []float64 `json:"dby"`
-	Dbz       []float64 `json:"dbz"`
+	// Dbx       []float64 `json:"dbx"`
+	// Dby       []float64 `json:"dby"`
+	// Dbz       []float64 `json:"dbz"`
 }
 
 func (ds *Dataset) WriteToJSON(filename string) error {
@@ -155,35 +154,39 @@ func main() {
 			wmm.DecimalYear(dYear).ToTime(),
 		)
 
+		if err != nil {
+			fmt.Printf("Error calculating magnetic field: %s\n", err)
+		}
+
 		// x,y,z,dx,dy,dz, lat, long, alt
 
-		fmt.Println("Results For")
-		fmt.Println()
+		// fmt.Println("Results For")
+		// fmt.Println()
 		lat, lng, hh := loc.Geodetic()
-		qualifier := "N"
-		quantity := lat / egm96.Deg
-		if quantity < 0 {
-			qualifier = "S"
-			// quantity = -quantity
-		}
+		// qualifier := "N"
+		// quantity := lat / egm96.Deg
+		// if quantity < 0 {
+		// qualifier = "S"
+		// quantity = -quantity
+		// }
 
 		// fmt.Printf("Latitude:\t%4.2f%s\n", quantity, qualifier)
 
-		qualifier = "E"
-		quantity = lng / egm96.Deg
-		if quantity >= 180 {
-			qualifier = "W"
-			// quantity = 360 - quantity
-		}
+		// qualifier = "E"
+		// quantity = lng / egm96.Deg
+		// if quantity >= 180 {
+		// qualifier = "W"
+		// quantity = 360 - quantity
+		// }
 		// fmt.Printf("Longitude:\t%4.2f%s\n", quantity, qualifier)
 
 		// relationship := "above"
-		quantity = hh
-		qualifier = "the WGS-84 ellipsoid"
-		if !hae {
-			// quantity, _ = loc.HeightAboveMSL()
-			qualifier = "mean sea level"
-		}
+		// quantity = hh
+		// qualifier = "the WGS-84 ellipsoid"
+		// if !hae {
+		// quantity, _ = loc.HeightAboveMSL()
+		// qualifier = "mean sea level"
+		// }
 		// if quantity < 0 {
 		// relationship = "below"
 		// quantity = -quantity
@@ -192,15 +195,15 @@ func main() {
 
 		// fmt.Printf("Date:\t\t%5.1f\n", dYear)
 
-		qualifier = ""
-		if spherical {
-			qualifier = "(Spherical)"
-		}
+		// qualifier = ""
+		// if spherical {
+		// 	qualifier = "(Spherical)"
+		// }
 		// fmt.Println()
 
-		if err != nil {
-			fmt.Printf("Warning: %s\n\n", err)
-		}
+		// if err != nil {
+		// fmt.Printf("Warning: %s\n\n", err)
+		// }
 
 		if spherical {
 			x, y, z, dx, dy, dz = mf.Spherical()
@@ -214,92 +217,32 @@ func main() {
 		dataset.Bx = append(dataset.Bx, x)
 		dataset.By = append(dataset.By, y)
 		dataset.Bz = append(dataset.Bz, z)
-		dataset.Dbx = append(dataset.Dbx, dx)
-		dataset.Dby = append(dataset.Dby, dy)
-		dataset.Dbz = append(dataset.Dbz, dz)
+		// dataset.Dbx = append(dataset.Dbx, dx)
+		// dataset.Dby = append(dataset.Dby, dy)
+		// dataset.Dbz = append(dataset.Dbz, dz)
 
-		dD, dM, dS := egm96.DegreesToDMS(mf.D())
-		iD, iM, iS := egm96.DegreesToDMS(mf.I())
-		gvD, gvM, gvS := egm96.DegreesToDMS(mf.GV(loc))
-		fmt.Println("       Main Field             Secular Change")
-		fmt.Printf("F    = %8.1f nT ± %5.1f nT  %6.1f nT/yr\n", mf.F(), mf.ErrF(), mf.DF())
-		if !spherical {
-			fmt.Printf("H    = %8.1f nT ± %5.1f nT  %6.1f nT/yr\n", mf.H(), mf.ErrH(), mf.DH())
-		}
-		fmt.Printf("X    = %8.1f nT ± %5.1f nT  %6.1f nT/yr %s\n", x, mf.ErrX(), dx, qualifier)
-		fmt.Printf("Y    = %8.1f nT ± %5.1f nT  %6.1f nT/yr %s\n", y, mf.ErrY(), dy, qualifier)
-		fmt.Printf("Z    = %8.1f nT ± %5.1f nT  %6.1f nT/yr %s\n", z, mf.ErrZ(), dz, qualifier)
-		if !spherical {
-			fmt.Printf("Decl =    %3.0fº %2.0f' ± %2.0f'         %4.1f'/yr\n", dD, dM+dS/60, mf.ErrD()*60, mf.DD()*60)
-			fmt.Printf("Incl =    %3.0fº %2.0f' ± %2.0f'         %4.1f'/yr\n", iD, iM+iS/60, mf.ErrI()*60, mf.DI()*60)
-			fmt.Println()
-			fmt.Printf("Grid Variation =  %2.0fº %2.0f'\n", gvD, gvM+gvS/60)
-		}
+		// dD, dM, dS := egm96.DegreesToDMS(mf.D())
+		// iD, iM, iS := egm96.DegreesToDMS(mf.I())
+		// gvD, gvM, gvS := egm96.DegreesToDMS(mf.GV(loc))
+		// fmt.Println("       Main Field             Secular Change")
+		// fmt.Printf("F    = %8.1f nT ± %5.1f nT  %6.1f nT/yr\n", mf.F(), mf.ErrF(), mf.DF())
+		// if !spherical {
+		// fmt.Printf("H    = %8.1f nT ± %5.1f nT  %6.1f nT/yr\n", mf.H(), mf.ErrH(), mf.DH())
+		// }
+		// fmt.Printf("X    = %8.1f nT ± %5.1f nT  %6.1f nT/yr %s\n", x, mf.ErrX(), dx, qualifier)
+		// fmt.Printf("Y    = %8.1f nT ± %5.1f nT  %6.1f nT/yr %s\n", y, mf.ErrY(), dy, qualifier)
+		// fmt.Printf("Z    = %8.1f nT ± %5.1f nT  %6.1f nT/yr %s\n", z, mf.ErrZ(), dz, qualifier)
+		// if !spherical {
+		// fmt.Printf("Decl =    %3.0fº %2.0f' ± %2.0f'         %4.1f'/yr\n", dD, dM+dS/60, mf.ErrD()*60, mf.DD()*60)
+		// fmt.Printf("Incl =    %3.0fº %2.0f' ± %2.0f'         %4.1f'/yr\n", iD, iM+iS/60, mf.ErrI()*60, mf.DI()*60)
+		// fmt.Println()
+		// fmt.Printf("Grid Variation =  %2.0fº %2.0f'\n", gvD, gvM+gvS/60)
+		// }
 	}
 
 	if err := dataset.WriteToJSON("equatorDataset.json"); err != nil {
 		panic(err)
 	}
-}
-
-func userInput() {
-	var (
-		input string
-		err   error
-	)
-
-	err = fmt.Errorf("")
-	for err != nil {
-		input = readUserInput(prompt["latitude"])
-		if input == "q" {
-			fmt.Println("Goodbye")
-			os.Exit(1)
-		}
-		latitude, err = parsing.ParseLatLng(input)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-
-	err = fmt.Errorf("")
-	for err != nil {
-		input = readUserInput(prompt["longitude"])
-		if input == "q" {
-			fmt.Println("Goodbye")
-			os.Exit(1)
-		}
-		longitude, err = parsing.ParseLatLng(input)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-
-	err = fmt.Errorf("")
-	for err != nil {
-		input = readUserInput(prompt["altitude"])
-		if input == "q" {
-			fmt.Println("Goodbye")
-			os.Exit(1)
-		}
-		altitude, hae, err = parsing.ParseAltitude(input)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-
-	err = fmt.Errorf("")
-	for err != nil {
-		input = readUserInput(prompt["date"])
-		if input == "q" {
-			fmt.Println("Goodbye")
-			os.Exit(1)
-		}
-		dYear, err = parsing.ParseTime(input)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-
 }
 
 func readUserInput(prompt string) (inp string) {
