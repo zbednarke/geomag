@@ -13,3 +13,5 @@
 
 # Intellij
 .idea/
+*.json
+*.DS_STORE

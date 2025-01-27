@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -33,15 +34,35 @@ var prompt = map[string]string{
 }
 
 type Dataset struct {
-	latitude  []float64 `json:"latitude"`
-	longitude []float64 `json:"longitude"`
-	altitude  []float64 `json:"altitude"`
-	bx        []float64 `json:"bx"`
-	by        []float64 `json:"by"`
-	bz        []float64 `json:"bz"`
-	dbx       []float64 `json:"dbx"`
-	dby       []float64 `json:"dby"`
-	dbz       []float64 `json:"dbz"`
+	Latitude  []float64 `json:"latitude"`
+	Longitude []float64 `json:"longitude"`
+	Altitude  []float64 `json:"altitude"`
+	Bx        []float64 `json:"bx"`
+	By        []float64 `json:"by"`
+	Bz        []float64 `json:"bz"`
+	Dbx       []float64 `json:"dbx"`
+	Dby       []float64 `json:"dby"`
+	Dbz       []float64 `json:"dbz"`
+}
+
+func (ds *Dataset) WriteToJSON(filename string) error {
+	// Create or truncate file
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Optionally set indentation for readability
+	encoder := json.NewEncoder(file)
+	// encoder.SetIndent("", "  ")
+
+	// Encode the struct to JSON and write directly to the file
+	if err := encoder.Encode(ds); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 var (
@@ -111,7 +132,7 @@ func main() {
 	altitude = 0.0
 
 	idx := -1
-	for longitude = 0; longitude < 360; longitude += 1 {
+	for longitude = 0; longitude < 360; longitude += .001 {
 		idx += 1
 		for longitude < 0 {
 			longitude += 360
@@ -143,39 +164,39 @@ func main() {
 		quantity := lat / egm96.Deg
 		if quantity < 0 {
 			qualifier = "S"
-			quantity = -quantity
+			// quantity = -quantity
 		}
 
-		fmt.Printf("Latitude:\t%4.2f%s\n", quantity, qualifier)
+		// fmt.Printf("Latitude:\t%4.2f%s\n", quantity, qualifier)
 
 		qualifier = "E"
 		quantity = lng / egm96.Deg
 		if quantity >= 180 {
 			qualifier = "W"
-			quantity = 360 - quantity
+			// quantity = 360 - quantity
 		}
-		fmt.Printf("Longitude:\t%4.2f%s\n", quantity, qualifier)
+		// fmt.Printf("Longitude:\t%4.2f%s\n", quantity, qualifier)
 
-		relationship := "above"
+		// relationship := "above"
 		quantity = hh
 		qualifier = "the WGS-84 ellipsoid"
 		if !hae {
-			quantity, _ = loc.HeightAboveMSL()
+			// quantity, _ = loc.HeightAboveMSL()
 			qualifier = "mean sea level"
 		}
-		if quantity < 0 {
-			relationship = "below"
-			quantity = -quantity
-		}
-		fmt.Printf("Altitude:\t%6.3f kilometers %s %s\n", quantity/1000, relationship, qualifier)
+		// if quantity < 0 {
+		// relationship = "below"
+		// quantity = -quantity
+		// }
+		// fmt.Printf("Altitude:\t%6.3f kilometers %s %s\n", quantity/1000, relationship, qualifier)
 
-		fmt.Printf("Date:\t\t%5.1f\n", dYear)
+		// fmt.Printf("Date:\t\t%5.1f\n", dYear)
 
 		qualifier = ""
 		if spherical {
 			qualifier = "(Spherical)"
 		}
-		fmt.Println()
+		// fmt.Println()
 
 		if err != nil {
 			fmt.Printf("Warning: %s\n\n", err)
@@ -187,19 +208,15 @@ func main() {
 			x, y, z, dx, dy, dz = mf.Ellipsoidal()
 		}
 
-		dataset.latitude = append(dataset.latitude, lat)
-		dataset.longitude = append(dataset.longitude, lng)
-		dataset.altitude = append(dataset.altitude, hh)
-		dataset.bx = append(dataset.bx, x)
-		dataset.by = append(dataset.by, y)
-		dataset.bz = append(dataset.bz, z)
-		dataset.dbx = append(dataset.dbx, dx)
-		dataset.dby = append(dataset.dby, dy)
-		dataset.dbz = append(dataset.dbz, dz)
-
-		if idx == 300 {
-			lat = 0
-		}
+		dataset.Latitude = append(dataset.Latitude, lat)
+		dataset.Longitude = append(dataset.Longitude, lng)
+		dataset.Altitude = append(dataset.Altitude, hh)
+		dataset.Bx = append(dataset.Bx, x)
+		dataset.By = append(dataset.By, y)
+		dataset.Bz = append(dataset.Bz, z)
+		dataset.Dbx = append(dataset.Dbx, dx)
+		dataset.Dby = append(dataset.Dby, dy)
+		dataset.Dbz = append(dataset.Dbz, dz)
 
 		dD, dM, dS := egm96.DegreesToDMS(mf.D())
 		iD, iM, iS := egm96.DegreesToDMS(mf.I())
@@ -218,6 +235,10 @@ func main() {
 			fmt.Println()
 			fmt.Printf("Grid Variation =  %2.0fº %2.0f'\n", gvD, gvM+gvS/60)
 		}
+	}
+
+	if err := dataset.WriteToJSON("equatorDataset.json"); err != nil {
+		panic(err)
 	}
 }
 
