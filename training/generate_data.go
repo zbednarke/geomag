@@ -32,6 +32,18 @@ var prompt = map[string]string{
 	"date": "Please enter the decimal year or calendar date (YYYY.yyy, MM DD YYYY or MM/DD/YYYY) ",
 }
 
+type Dataset struct {
+	latitude  []float64 `json:"latitude"`
+	longitude []float64 `json:"longitude"`
+	altitude  []float64 `json:"altitude"`
+	bx        []float64 `json:"bx"`
+	by        []float64 `json:"by"`
+	bz        []float64 `json:"bz"`
+	dbx       []float64 `json:"dbx"`
+	dby       []float64 `json:"dby"`
+	dbz       []float64 `json:"dbz"`
+}
+
 var (
 	cofFile    string
 	spherical  bool
@@ -45,6 +57,7 @@ var (
 	loc        egm96.Location
 	x, y, z    float64
 	dx, dy, dz float64
+	dataset    Dataset
 )
 
 func init() {
@@ -97,8 +110,9 @@ func main() {
 	// longitude = -100.0
 	altitude = 0.0
 
+	idx := -1
 	for longitude = 0; longitude < 360; longitude += 1 {
-
+		idx += 1
 		for longitude < 0 {
 			longitude += 360
 		}
@@ -120,6 +134,8 @@ func main() {
 			wmm.DecimalYear(dYear).ToTime(),
 		)
 
+		// x,y,z,dx,dy,dz, lat, long, alt
+
 		fmt.Println("Results For")
 		fmt.Println()
 		lat, lng, hh := loc.Geodetic()
@@ -129,6 +145,7 @@ func main() {
 			qualifier = "S"
 			quantity = -quantity
 		}
+
 		fmt.Printf("Latitude:\t%4.2f%s\n", quantity, qualifier)
 
 		qualifier = "E"
@@ -168,6 +185,20 @@ func main() {
 			x, y, z, dx, dy, dz = mf.Spherical()
 		} else {
 			x, y, z, dx, dy, dz = mf.Ellipsoidal()
+		}
+
+		dataset.latitude = append(dataset.latitude, lat)
+		dataset.longitude = append(dataset.longitude, lng)
+		dataset.altitude = append(dataset.altitude, hh)
+		dataset.bx = append(dataset.bx, x)
+		dataset.by = append(dataset.by, y)
+		dataset.bz = append(dataset.bz, z)
+		dataset.dbx = append(dataset.dbx, dx)
+		dataset.dby = append(dataset.dby, dy)
+		dataset.dbz = append(dataset.dbz, dz)
+
+		if idx == 300 {
+			lat = 0
 		}
 
 		dD, dM, dS := egm96.DegreesToDMS(mf.D())
